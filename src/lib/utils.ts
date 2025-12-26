@@ -4,6 +4,22 @@ import type { MemoryFtsRow, MemoryRecord } from "@/db/db";
 
 const db = new SQL(`sqlite://${env.DB_PATH}`);
 
+// Insert a new memory row and return the created record
+export async function rememberMemory(
+  raw_text: string,
+  ai_tags?: string[] | string
+) {
+  const tags = Array.isArray(ai_tags) ? ai_tags.join(",") : ai_tags ?? null;
+
+  const [created] = await db<MemoryRecord[]>`
+    INSERT INTO memories (raw_text, ai_tags)
+    VALUES (${raw_text}, ${tags})
+    RETURNING id, raw_text, ai_tags, timestamp
+  `;
+
+  return created;
+}
+
 // Fuzzy search with AND then OR fallback
 export async function executeFuzzySearch(keywords: string[]) {
   const clean = keywords
@@ -48,6 +64,11 @@ export async function executeFuzzySearch(keywords: string[]) {
 
 // Delete by ids
 export async function deleteByIds(ids: number[]) {
-  if (!ids.length) return;
-  await db`DELETE FROM memories WHERE id IN ${db(ids)}`;
+  if (!ids.length) return [] as number[];
+
+  const deleted = await db<{ id: number }[]>`
+    DELETE FROM memories WHERE id IN ${db(ids)} RETURNING id
+  `;
+
+  return deleted.map((row) => row.id);
 }
