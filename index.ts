@@ -1,11 +1,14 @@
 import Elysia from "elysia";
 import { env } from "./env";
+import { initDb } from "./db";
 
 //* load configs
 const GEMINI_API_KEY = env.GEMINI_API_KEY;
 const SERVER_SECRET = env.SERVER_SECRET;
 const DB_PATH = env.DB_PATH;
 const MODEL_ID = env.MODEL_ID;
+
+await initDb(DB_PATH);
 
 const app = new Elysia().onBeforeHandle(({ request, set }) => {
   const serverSecret = request.headers.get("x-server-secret");
