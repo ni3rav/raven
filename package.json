@@ -12,5 +12,10 @@
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "elysia": "^1.4.19"
+  },
+  "scripts": {
+    "build:cli": "bun build bin/cli.ts --compile --outfile rv",
+    "rv": "bun bin/cli.ts",
+    "dev": "bun run src/index.ts"
   }
 }
