@@ -1,5 +1,20 @@
 import { SQL } from "bun";
 
+// Shared table/FTS row types for reuse in queries
+export type MemoryRecord = {
+  id: number;
+  timestamp: string;
+  raw_text: string | null;
+  ai_tags: string | null;
+};
+
+export type MemoryFtsRow = {
+  rowid: number;
+  raw_text: string | null;
+  ai_tags: string | null;
+  rank?: number;
+};
+
 export async function initDb(dbPath: string) {
   const db = new SQL(`sqlite://${dbPath}`);
 

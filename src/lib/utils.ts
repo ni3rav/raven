@@ -1,5 +1,6 @@
 import { SQL } from "bun";
 import { env } from "@/lib/env";
+import type { MemoryFtsRow, MemoryRecord } from "@/db/db";
 
 const db = new SQL(`sqlite://${env.DB_PATH}`);
 
@@ -12,8 +13,8 @@ export async function executeFuzzySearch(keywords: string[]) {
 
   if (!clean.length) return [];
 
-  const run = async (expr: string) =>
-    db`
+  const run = async (expr: string): Promise<MemoryFtsRow[]> =>
+    db<MemoryFtsRow[]>`
       SELECT rowid, * 
       FROM memories_idx 
       WHERE memories_idx MATCH ${expr}
@@ -23,7 +24,7 @@ export async function executeFuzzySearch(keywords: string[]) {
 
   // 1) AND search
   const andExpr = clean.map((k) => `"${k}"`).join(" AND ");
-  let rows = await run(andExpr);
+  let rows: MemoryFtsRow[] = await run(andExpr);
 
   // 2) OR search if too few
   if (rows.length < 5) {
@@ -36,7 +37,7 @@ export async function executeFuzzySearch(keywords: string[]) {
   if (!rows.length) return [];
 
   const ids = rows.map((r) => r.rowid);
-  const full = await db`
+  const full = await db<MemoryRecord[]>`
     SELECT id, raw_text, ai_tags, timestamp
     FROM memories
     WHERE id IN ${db(ids)}
