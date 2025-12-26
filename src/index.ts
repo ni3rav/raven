@@ -1,6 +1,6 @@
 import Elysia from "elysia";
-import { env } from "./env";
-import { initDb } from "./db";
+import { env } from "@/lib/env";
+import { initDb } from "@/db/db";
 
 //* load configs
 const GEMINI_API_KEY = env.GEMINI_API_KEY;
